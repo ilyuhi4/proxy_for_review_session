@@ -1,3 +1,4 @@
+import re
 from urllib import request
 
 import lxml
@@ -40,12 +41,11 @@ def replace_direct_urls(response):
     :rtype: Response
     """
     soup = BeautifulSoup(response.content, 'lxml')
-    for tag in soup.find_all('a'):
-        if main_page in str(tag['href']):
-            old_string = tag['href']
-            new_string = old_string.replace(main_page, '')
-            tag['href'] = new_string
-        response._content = soup.encode_contents()
+    for tag in soup.find_all(href=re.compile(main_page)):
+        old_string = tag['href']
+        new_string = old_string.replace(main_page, '')
+        tag['href'] = new_string
+    response._content = soup.encode_contents()
     return response
 
 
