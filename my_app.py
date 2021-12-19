@@ -1,51 +1,50 @@
 from urllib import request
 
+import lxml
 import requests as requests
-from flask import Flask
+from flask import Flask, request
 from markupsafe import escape
+from bs4 import BeautifulSoup
 
 app = Flask(__name__)
 main_page = 'https://news.ycombinator.com/'
 
-
-@app.route("/hello")
-def hello_world():
-    return "<p>Hello, World!</p>"
-
-
-@app.route('/test/<path:subpath>')
-def show_subpath(subpath):
-    # show the subpath after /path/
-    return 'Путь запроса %s' % escape(subpath)
-
-
+@app.route('/')
 @app.route('/<path:subpath>')
-def xakep_main_page(subpath: str) -> bytes:
+def xakep_main_page(subpath: str = '') -> bytes:
     """Main view function that redirects requests from local server to remote in main_page global variable
     :subpath: str - string from address without http://127.0.0.1/
     :rtype: bytes
     """
-    print('Идем развлекаться на Xakep NEWS')
-    print(f'Путь поиска страницы: {subpath}')
-    # status_code = get_page_from_xakep(subpath)
-    # return f'Идем на Xakep NEWS!     \nStatus code is: {get_page_from_xakep(subpath)}'
-    return get_page_from_xakep(subpath).content
+    # GET параметры теряются нужно дополнительно передавать
+    # http://127.0.0.1:5000/user?id=atamyrat
+    return get_page_from_xakep(subpath=subpath, params=dict(request.values.items()))
 
 
-def get_page_from_xakep(subpath: str) -> requests.Response:
+def get_page_from_xakep(subpath: str, params: dict) -> bytes:
     """
     Returns the result of GET request to the remote page
-    :rtype: requests.Response
+    :type params: dict
+    :type subpath: str or path
     """
     current_page = main_page + subpath
-    print(f'Полезли на Xakep тащить страницу: {subpath}')
-    result = requests.get(current_page)
-    print('Код ответа:', result.status_code)
-    print('Утащили ', (len(result.content)), 'символов')
-    print('Отправил контент обратно')
-    return result
+    result = requests.get(current_page, params=params)
+    if result.headers['content-type'] == 'text/html':
+        result = replace_direct_urls(result)
+    return result.content
 
 
+# проверка и редактирование прямых ссылок на другие ресурсы чтобы активный адрес всё равно оставался локальным
+def replace_direct_urls(response):
+    """Заменяем прямые ссылки main_page на относительные
+    :rtype: Response
+    """
+    soup = BeautifulSoup(response.content, 'lxml')
+    for tag in soup.find_all('a'):
+        old_string = tag['href']
+        new_string = old_string.replace(main_page, '')
+        tag['href'] = new_string
+        response._content = soup.encode_contents()
+    return response
 
-#TODO проверка и редактирование прямых ссылок на другие ресурсы чтобы активный адрес всё равно оставался локалным
-#
+# TODO http://127.0.0.1:5000/reply - не работает
