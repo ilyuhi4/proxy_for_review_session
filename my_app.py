@@ -41,10 +41,15 @@ def replace_direct_urls(response):
     """
     soup = BeautifulSoup(response.content, 'lxml')
     for tag in soup.find_all('a'):
-        old_string = tag['href']
-        new_string = old_string.replace(main_page, '')
-        tag['href'] = new_string
+        if main_page in str(tag['href']):
+            old_string = tag['href']
+            new_string = old_string.replace(main_page, '')
+            tag['href'] = new_string
         response._content = soup.encode_contents()
     return response
+
+
+def add_tag_to_words(response: requests.Response):
+    pass
 
 # TODO http://127.0.0.1:5000/reply - не работает
