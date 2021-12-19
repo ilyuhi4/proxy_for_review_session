@@ -65,45 +65,45 @@ def add_tag_to_words(response: requests.Response):
             for word in word_list:
                 # перед редактированием отправляем слово на чистку и получаем обратно очищенное слово с признаком чистки
                 # и передаем на редактирование
-                if len(word) in (6,7):
-                    cleaned_word=clean_word(word)
+                if len(word) in (6, 7):
+                    # TODO обработать "public.)"
+                    cleaned_word = clean_word(word)
                     if len(cleaned_word[0]) == 6 and cleaned_word[0].isalpha():
                         result_list.append(edit_word(cleaned_word, word[-1]))
                     else:
                         result_list.append(word)
                 else:
                     result_list.append(word)
-            result_tag_string=' '.join(result_list)
+            result_tag_string = ' '.join(result_list)
             tag.string.replace_with(result_tag_string)
     response._content = soup.encode_contents()
     return response
+
 
 # TODO http://127.0.0.1:5000/reply - не работает
 
 
 def clean_word(word: str) -> tuple:
-    """Очистка слова от мусора: слово может быть из 6 символов, но со знаками препинания слитно
-        Возвращаем очищеное слово и признак очистки"""
-    if word.replace('.', '')!=word:
-        return (word.replace('.', ''), True)
-    elif word.replace(',', '')!=word:
-        return (word.replace(',', ''), True)
-    elif word.replace(':', '')!=word:
-        return (word.replace(':', ''), True)
-    elif word.replace('!', '')!=word:
-        return (word.replace('!', ''), True)
-    elif word.replace('?', '')!=word:
-        return (word.replace('?', ''), True)
+    """Очистка слова от мусора: слово может быть из 6 символов, но со знаками препинания слитно.
+        Возвращаем очищенное слово и признак очистки"""
+    if word.replace('.', '') != word:
+        return word.replace('.', ''), True
+    elif word.replace(',', '') != word:
+        return word.replace(',', ''), True
+    elif word.replace(':', '') != word:
+        return word.replace(':', ''), True
+    elif word.replace('!', '') != word:
+        return word.replace('!', ''), True
+    elif word.replace('?', '') != word:
+        return word.replace('?', ''), True
     else:
-        return (word, False)
+        return word, False
+
 
 def edit_word(cleaned_word: tuple, symbol: str) -> str:
     """Производим добавление символа ™ в слово в зависимости от наличия или отсутствия пунктуации"""
-    edited_word=''
     if cleaned_word[1]:
         print(cleaned_word, symbol)
-        edited_word = cleaned_word[0] + "™" + symbol
+        return cleaned_word[0] + "™" + symbol
     else:
-        edited_word = cleaned_word[0] + "™"
-    # print(edited_word)
-    return edited_word
+        return cleaned_word[0] + "™"
