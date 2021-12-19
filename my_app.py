@@ -44,3 +44,8 @@ def get_page_from_xakep(subpath: str) -> requests.Response:
     print('Утащили ', (len(result.content)), 'символов')
     print('Отправил контент обратно')
     return result
+
+
+
+#TODO проверка и редактирование прямых ссылок на другие ресурсы чтобы активный адрес всё равно оставался локалным
+#
