@@ -68,7 +68,7 @@ def add_tag_to_words(response: requests.Response):
                 if len(word) in (6,7):
                     cleaned_word=clean_word(word)
                     if len(cleaned_word[0]) == 6 and cleaned_word[0].isalpha():
-                        result_list.append(edit_word(cleaned_word, word[:-1]))
+                        result_list.append(edit_word(cleaned_word, word[-1]))
                     else:
                         result_list.append(word)
                 else:
@@ -101,6 +101,7 @@ def edit_word(cleaned_word: tuple, symbol: str) -> str:
     """Производим добавление символа ™ в слово в зависимости от наличия или отсутствия пунктуации"""
     edited_word=''
     if cleaned_word[1]:
+        print(cleaned_word, symbol)
         edited_word = cleaned_word[0] + "™" + symbol
     else:
         edited_word = cleaned_word[0] + "™"
