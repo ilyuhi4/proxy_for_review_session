@@ -29,7 +29,7 @@ def get_page_from_xakep(subpath: str, params: dict) -> bytes:
     """
     current_page = main_page + subpath
     result = requests.get(current_page, params=params)
-    print(result.headers['content-type'])
+    # ковыряем контент только для текстов - остальное отдаем неизменно
     if 'text/html' in result.headers['content-type']:
         result = replace_direct_urls(result)
     return result.content
@@ -103,7 +103,6 @@ def clean_word(word: str) -> tuple:
 def edit_word(cleaned_word: tuple, symbol: str) -> str:
     """Производим добавление символа ™ в слово в зависимости от наличия или отсутствия пунктуации"""
     if cleaned_word[1]:
-        print(cleaned_word, symbol)
         return cleaned_word[0] + "™" + symbol
     else:
         return cleaned_word[0] + "™"
